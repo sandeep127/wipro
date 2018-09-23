@@ -1,0 +1,322 @@
+Introduction Oracle SQL and PL/SQL
+Login to SCOTT schema and write queries for the following: 
+
+ 
+Module 1/Day 1
+SELECT Statement:
+1.	List tables in your schema and check for existence of DEPT, EMP and SALGERADE tables
+SELECT OBJECT_NAME FROM USER_OBJECTS;
+
+2.	If these tables do NOT exists – execute the script in the embedded DemoBld.SQL file to create and populate the tables .
+START C:\DEMOBLD.SQL;
+
+3.	List all columns and all rows from DEPT
+SELECT * FROM DEPT;
+
+4.	List all columns and all rows from EMP
+SELECT * FROM EMP;
+
+5.	List all columns and all rows from SALGRADE
+SELECT * FROM SALGRADE;
+
+6.	List employee number, name and salary from employee table
+SELECT EMPLOYEE_ID,FIRST_NAME||' '||LAST_NAME,SALARY FROM EMPLOYEES;
+
+7.	List employee number, name and salary from employee table where salary is > 3000
+SELECT EMPLOYEE_ID,FIRST_NAME,SALARY FROM EMPLOYEES WHERE SALARY>3000;
+
+8.	List employees joined after year 1981
+SELECT * FROM EMPLOYEES WHERE TO_CHAR(HIRE_DATE,'RRRR')>1981;
+
+9.	List all clerks (JOB = ‘CLERK’)
+SELECT * FROM EMP WHERE JOB='CLERK';
+
+10.	List employees in the ascending order of salary
+SELECT * FROM EMPLOYEES ORDER BY SALARY;
+
+11.	List employees in ascending order of job within descending order of deptno
+SELECT * FROM EMP ORDER BY DEPTNO DESC,JOB;
+
+12.	List distinct departments from employee table
+SELECT DISTINCT DEPARTMENT_NAME FROM DEPARTMENTS NATURAL JOIN EMPLOYEES;
+
+13.	List distinct jobs in each department from employee table
+SELECT DISTINCT JOB_ID,DEPARTMENT_ID FROM EMPLOYEES GROUP BY DEPARTMENT_ID,JOB_ID;
+
+14.	List name, salary and annual salary in the descending order of annual salary – annual salary is a computed column – SAL * 12
+SELECT ENAME,SAL,SAL*12 “ANNUAL SALARY” FROM EMP ORDER BY SAL; 
+
+15.	List employees whose salary is not in the range of 2000 and 3000
+SELECT FIRST_NAME FROM EMPLOYEES WHERE SALARY NOT BETWEEN 2000 AND 3000;
+
+16.	List name and the deptno for all employees who are NOT members of departments 10 and 20
+SELECT FIRST_NAME,DEPARTMENT_ID FROM EMPLOYEES WHERE DEPARTMENT_ID NOT IN(10,20);
+
+17.	List employees for whom COMM is not applicable
+SELECT * FROM EMPLOYEES WHERE COMMISSION_PCT IS NULL;
+
+18.	List employees for whom COMM is applicable 
+SELECT * FROM EMPLOYEES WHERE COMMISSION_PCT IS NOT NULL;
+
+19.	List employees in ascending order of COMM and note how NULLs are sorted
+SELECT FIRST_NAME FROM EMPLOYEES ORDER BY COMMISSION_PCT;
+
+20.	List employees whose names start with ‘’SMITH’
+SELECT * FROM EMP WHERE ENAME LIKE 'SMITH%';
+
+21.	List employees whose name contain the ‘MI’ 
+SELECT * FROM EMP WHERE ENAME LIKE '%MI%';
+
+22.	List employees whose name start with an _ (underscore) char. 
+SELECT * FROM EMP WHERE ENAME LIKE '\_%' ESCAPE '\';
+
+23.	List all employees joined between two given dates.
+SELECT * FROM EMP WHERE HIREDATE BETWEEN '&A' AND '&B';
+  A:10-AUG-1980
+	B:20-OCT-1984
+
+24.	List all clerks in deptno 10
+SELECT ENAME FROM EMP WHERE DEPTNO=10 AND JOB='CLERK';
+
+25.	List total/sum, maximum, minimum, average of salary from employee table
+SELECT SUM(SALARY),MAX(SALARY),MIN(SALARY),AVG(SALARY) FROM EMPLOYEES;
+
+26.	List average and count of commission of all employees in department 10
+SELECT AVG(COMM),COUNT(COMM) FROM EMP WHERE DEPTNO=10;
+
+27.	List department wise no of employees and total salary
+SELECT COUNT(*), SUM(SAL) FROM EMP GROUP BY DEPTNO;
+
+28.	List total salary Job wise within each department
+SELECT JOB,DEPTNO,SUM(SAL) FROM EMP GROUP BY DEPTNO,JOB;
+
+29.	List department wise total salary for deptno 10 and 20 only
+SELECT SUM(SAL) SALARY,DEPTNO FROM EMP GROUP BY DEPTNO HAVING DEPTNO=10 OR DEPTNO=20;
+
+30.	List department wise total salary where total salary is > 6000
+SELECT DEPTNO,SUM(SAL) FROM EMP GROUP BY DEPTNO HAVING SUM(SAL)>6000;
+
+31.	SELECT COUNT(*), COUNT(COMM) FROM EMP; - explain why the two counts are different
+COUNT(COMM) will only count and give not null values of comm, whereas COUNT(*) will count all the records.
+
+Sub Queries:
+1.	List employees whose job is same as that of ‘SMITH’
+SELECT ENAME FROM EMP WHERE JOB=(SELECT JOB FROM EMP WHERE ENAME='SMITH');
+
+2.	List employees who have joined after ‘ADAM’
+SELECT FIRST_NAME FROM EMPLOYEES WHERE HIRE_DATE>(SELECT HIRE_DATE FROM EMPLOYEES WHERE FIRST_NAME='ADAM')
+
+3.	List employees who salary is greater than ‘SCOTT’s salary
+SELECT ENAME FROM EMP WHERE SAL>(SELECT SAL FROM EMP WHERE ENAME='SCOTT');
+
+4.	List employees getting the maximum salary
+SELECT ENAME FROM EMP WHERE SAL=(SELECT MAX(SAL) FROM EMP);
+
+5.	List employees show salary is > the max salary of all employees in deptno 30
+SELECT ENAME FROM EMP WHERE SAL>(SELECT MAX(SAL) FROM EMP WHERE DEPTNO=30);
+
+6.	List all employees whose deptno and Job are same as that of employee with empno 7788.
+SELECT * FROM EMP WHERE DEPTNO=(SELECT DEPTNO FROM EMP WHERE EMPNO=7788) AND JOB=(SELECT JOB FROM EMP WHERE EMPNO=7788) AND EMPNO<>7788;
+
+7.	List employee who are not managers
+SELECT ENAME FROM EMP WHERE ENAME NOT IN(SELECT DISTINCT B.ENAME FROM EMP A,EMP B WHERE A.MGR=B.EMPNO);
+
+8.	List all managers
+SELECT ENAME FROM EMP WHERE EMPNO IN(SELECT DISTINCT MGR FROM EMP);
+
+9.	List all employees who earn(salary) more than the average salary in their own department
+SELECT A.ENAME FROM EMP A WHERE A.SAL>(SELECT AVG(B.SAL) FROM EMP B WHERE A.DEPTNO=B.DEPTNO);
+
+10.	List employees whose salary is greater than their manager’s salary
+SELECT A.ENAME FROM EMP A WHERE A.SAL > (SELECT B.SAL FROM EMP B WHERE A.MGR=B.EMPNO);
+
+11.	List details of departments from DEPT table for which there are no employees in EMP table 
+SELECT * FROM DEPT WHERE DEPT.DEPTNO NOT IN(SELECT DEPTNO FROM EMP); 
+
+Module 2/Day 2
+Joins:
+1.	List employee name, department number and their corresponding department name by joining EMP and DEPT tables
+SELECT ENAME,DEPTNO,DNAME FROM EMP NATURAL JOIN DEPT;
+
+2.	List employee name and their manager name by joining EMP table to itself
+SELECT A.ENAME EMPLOYEE,B.ENAME "MANAGER NAME" FROM EMP A,EMP B WHERE A.MGR=B.EMPNO;
+
+3.	List employee name, department name and their grade by joining EMP, DEPT and SALGRADE tables
+SELECT ENAME,DNAME,GRADE FROM EMP,DEPT,SALGRADE WHERE EMP.DEPTNO=DEPT.DEPTNO AND (EMP.SAL BETWEEN LOSAL AND HISAL);
+
+4.	List employees who work in ‘Research’ department by joining EMP and DEPT tables
+SELECT ENAME FROM EMP,DEPT WHERE EMP.DEPTNO=DEPT.DEPTNO AND DNAME='RESEARCH';
+
+5.	List all rows from EMP table and only the matching rows from DEPT table – LEFT OUTER JOIN
+SELECT * FROM EMP LEFT OUTER JOIN DEPT USING(DEPTNO);
+
+6.	List only matching rows from EMP table and all rows from DEPT table – RIGTH OUTER JOIN
+SELECT * FROM EMP RIGHT OUTER JOIN DEPT USING(DEPTNO);
+
+7.	Write a query to perform full outer join between EMP and DEPT tables
+SELECT * FROM EMP FULL OUTER JOIN DEPT USING(DEPTNO);
+
+8.	List employee name, their manager name and their manager’s manager name
+SELECT A.ENAME "EMPLOYEE NAME",B.ENAME "MANAGER NAME",C.ENAME "MANAGER'S MANAGER NAME" FROM EMP A,EMP B,EMP C WHERE A.MGR=B.EMPNO AND B.MGR=C.EMPNO;
+
+DDL
+1.	Create DEPARTMENT table with the following columns with appropriate data type and width 
+a)	Deptno PK
+b)	Danme 
+c)	Location
+CREATE TABLE DEPARTMENT(DEPTNO INTEGER CONSTRAINT DEPARTMENTT_DEPTNO_PK PRIMARY KEY, DNAME  VARCHAR2(30),LOC VARCHAR2(30));
+
+2.	Create EMPLOYEE table with the following columns with appropriate data type and width 
+a.	empno PK
+b.	ename not null 
+c.	designation
+d.	sex
+e.	basic_salary (> 0 and < 500000)  
+f.	Date of joining 
+g.	Deptno reference deptno of DEPARTMENT table
+CREATE TABLE EMPLOYEE(EMPNO NUMBER CONSTRAINT EMPLOYEE_EMPNO_PK PRIMARY KEY,ENAME VARCHAR2(30) CONSTRAINT EMPLOYEE_ENAME_NN NOT NULL, DESIGNATION VARCHAR2(30), SEX VARCHAR2(7),BASIC_SALARY NUMBER CONSTRAINT EMPLOYEE_SALARY_CHK CHECK(BASIC_SALARY>0 AND BASIC_SALARY<500000), DATE_OF_JOINING DATE, DEPTNO NUMBER CONSTRAINT EMPLOYEE_DEPTNO_FK REFERENCES DEPARTMENT(DEPTNO));
+
+3.	Alter table EMPLOYEE add column commission
+ALTER TABLE EMPLOYEE ADD(COMMISSION NUMBER);
+
+4.	Alter table EMPLOYEE add constraint SEX in (‘M’, ‘F’)
+ALTER TABLE EMPLOYEE MODIFY(SEX VARCHAR2(7) CONSTRAINT EMPLOYEE_SEX_CHK CHECK(SEX='M' OR SEX='F'));
+
+5.	Create Index on ename column of EMPLOYEE table
+CREATE INDEX I1 ON EMPLOYEE(ENAME);
+
+6.	Create exact replica of EMPLOYEE table with no data
+CREATE TABLE EMPLOYEE_COPY AS SELECT * FROM EMPLOYEE WHERE 1=2;
+
+7.	Create new table called EX_EMP with columns empno, ename, basic_salary and populate the data from EMPLOYEE table
+CREATE TABLE EX_EMP AS SELECT EMPNO,ENAME,BASIC_SALARY FROM EMPLOYEE;
+
+8.	Drop the Index created on ename column.
+DROP INDEX I1;
+
+DML
+1.	Insert at least 5 valid rows into DEPARTMENT table and commit the changes
+INSERT INTO DEPARTMENT VALUES(10,'ACCOUNTS','BDC');
+INSERT INTO DEPARTMENT VALUES(20,'ADMINISTRATION','HDC');
+INSERT INTO DEPARTMENT VALUES(30,'NETWORKING','GNDC');
+INSERT INTO DEPARTMENT VALUES(40,'OPERATIONS','ODC');
+INSERT INTO DEPARTMENT VALUES(50,'IT','BHDC');
+COMMIT;
+ 
+2.	Insert at least 15 valid rows in EMPLOYEE table and commit the changes
+INSERT INTO EMPLOYEE VALUES(101,'TEJA','DEVELOPER','M',22000,'06-AUG-2018',10,500);
+INSERT INTO EMPLOYEE VALUES(102,'ATUL','DEVELOPER','M',24000,'06-AUG-2018',30,600);
+INSERT INTO EMPLOYEE VALUES(103,'NIL','SUPPORT','M',25600,'06-AUG-2018',20,700);
+INSERT INTO EMPLOYEE VALUES(104,'SANDEEP','MANAGER','M',26000,'06-AUG-2018',40,800);
+INSERT INTO EMPLOYEE VALUES(105,'BITTU','ANALYST','M',23000,'06-AUG-2018',10,500);
+INSERT INTO EMPLOYEE VALUES(106,'ANUBHAV','SUPPORT','M',29000,'06-AUG-2018',50,650);
+INSERT INTO EMPLOYEE VALUES(107,'PRARAMBHA','DEVELOPER','M',25000,'06-AUG-2018',10,500);
+INSERT INTO EMPLOYEE VALUES(108,'PRATHAK','DEVELOPER','M',25000,'06-AUG-2018',20,900);
+INSERT INTO EMPLOYEE VALUES(109,'AISHWARYA','DEVELOPER','F',25000,'06-AUG-2018',10,700);
+INSERT INTO EMPLOYEE VALUES(110,'SHUBHAM SAHU','MANAGER','M',25000,'06-AUG-2018',30,500);
+INSERT INTO EMPLOYEE VALUES(111,'ADISH','DEVELOPER','M',25000,'06-AUG-2018',10,500);
+INSERT INTO EMPLOYEE VALUES(112,'RAHUL','DEVELOPER','M',28000,'06-AUG-2018',40,700);
+INSERT INTO EMPLOYEE VALUES(113,'KULJEET','SUPPORT','M',25000,'06-AUG-2018',10,800);
+INSERT INTO EMPLOYEE VALUES(114,'VAMSHI','DEVELOPER','M',25000,'06-AUG-2018',50,500);
+INSERT INTO EMPLOYEE VALUES(115,'YASHWANT','DEVELOPER','M',27000,'06-AUG-2018',10,900);
+COMMIT;
+ 
+3.	Update basic_salary by 10% for employees in deptno 10 and 20 and commit the changes
+UPDATE EMPLOYEE SET BASIC_SALARY=BASIC_SALARY*10/100 WHERE DEPTNO=10 ORDEPTNO=20;
+COMMIT;
+ 
+4.	Update basic_salary and commission by 10% and 2% for all employees for whom commission is currently applicable and commit the changes
+UPDATE EMPLOYEE SET BASIC_SALARY=BASIC_SALARY*10/100, COMMISSION=COMMISSION*2/100 WHERE COMMISSION IS NOT NULL;
+COMMIT;
+ 
+5.	Update the designation of given employee to MANAGER based of given employee number and commit the changes.
+UPDATE EMPLOYEE SET DESIGNATION='MANAGER' WHERE EMPNO=&EMPNO;
+COMMIT; 
+
+6.	Delete employees joined before a given year and commit changes 
+DELETE FROM EMPLOYEE WHERE TO_NUMBER(TO_CHAR(DATE_OF_JOINING,'RRRR'))< &YEAR;
+
+7.	Delete all rows from employee tables.
+DELETE FROM EMPLOYEE;
+
+8.	Query employee table
+SELECT * FROM EMPLOYEE;
+
+9.	ROLLBACK
+ROLLBACK 
+
+10.	Query employee table
+SELECT * FROM EMPLOYEE;
+
+11.	Delete all rows from employee tables permanently using appropriate DDL command
+TRUNCATE TABLE EMPLOYEE; 
+
+Procedure and Functions:
+1.	Create a procedure named DISP_EMP_DETAILS with 3 parameters  one [ie. iEmpNo ] is an “IN” mode and other two are [ie. sGrade and sSalary]  “OUT” mode parameters. The procedure should retrieve the Grade (this is column of SALGRADE table) and Salary for the specified employee number [ie. iEmpNo ] by joining EMP and SALGRADE table and assign the retrieved values to the “OUT” mode parameters. 
+Note.:
+It should display an appropriate error message if the specified employee number 
+does not exist in “Employee” table.
+Call the created procedure using Bind variable and print the details.
+	
+CREATE OR REPLACE PROCEDURE DISP_EMP_DETAILS(V_EMPNO IN EMP.EMPNO%TYPE,  V_GRADE OUT SALGRADE.GRADE%TYPE, V_SALARY  OUT  EMP.SAL%TYPE)
+IS
+V_COUNT BINARY_INTEGER;
+BEGIN
+SELECT COUNT(*) INTO V_COUNT FROM EMP WHERE EMPNO=V_EMPNO;
+IF V_COUNT>0 THEN
+SELECT SAL,GRADE INTO V_SALARY,V_GRADE FROM EMP,SALGRADE WHERE (SAL BETWEEN LOSAL AND HISAL) and EMPNO=V_EMPNO;
+ELSE
+RAISE_APPLICATION_ERROR(-20001,'EMPNO DOES NOT EXISTS');
+END IF;
+END;
+EXECUTION STATEMENT :
+EXEC DISP_EMP_DETAILS(7566,:grade,:sal); 
+
+2.	Create a procedure named DISPLAY_RECORDS which accepts the P_JOB as a parameter and display all the employees (empno, sal, deptno, job) from the “EMP” table matching the given P_JOB in the following format :-
+EmployeeNumber	Salary		DepartmentNumber    Job 
+ XXXXXXXX		    99,999			  99	           CLERK
+ XXXXXXXX		     9,999			  12  	         CLERK 
+Note.:
+It should display an appropriate error message if there are no employees with the given JOB 
+
+CREATE OR REPLACE PROCEDURE DISPLAY_RECORDS(P_JOB EMP.JOB%TYPE)
+IS
+V_COUNT BINARY_INTEGER;
+CURSOR C1 IS SELECT EMPNO,SAL,DEPTNO,JOB FROM EMP;
+BEGIN
+SELECT COUNT(*) INTO V_COUNT FROM EMP WHERE JOB=P_JOB;
+IF V_COUNT>0 THEN
+DBMS_OUTPUT.PUT_LINE('EMPLOYEE_NUMBER'||'   '||'SALARY'||'  '||'DEPARTMENT_NUMBER'||'  '||'JOB');
+FOR V_REC IN C1 LOOP
+DBMS_OUTPUT.PUT_LINE(V_REC.EMPNO||'         '||V_REC.SAL||'                   '||V_REC.DEPTNO||'           '||V_REC.JOB);
+END LOOP;
+ELSE
+RAISE_APPLICATION_ERROR(-20001,'JOB DOES NOT EXISTS. PLS ENTER THE CORRECT JOB');
+END IF;
+END;
+
+EXECUTION QUERY:-
+EXEC DISPLAY_RECORD(‘CLERK’);
+
+
+3.	Create a function named GET_EMP_ANNSAL which accepts employee Number as 
+a parameter and Returns Annual Salary of the given employee from EMP table if the record exist otherwise returns -1  ( formula to computer ANNUAL_SALARY = SAL * 12) 
+
+CREATE OR REPLACE FUNCTION GET_EMP_ANNSAL(V_EMPNO EMP.EMPNO%TYPE) RETURN EMP.SAL%TYPE
+IS
+V_COUNT BINARY_INTEGER;
+V_SAL EMP.SAL%TYPE;
+V_ANN_SAL EMP.SAL%TYPE;
+BEGIN
+SELECT COUNT(*) INTO V_COUNT FROM EMP WHERE EMPNO=V_EMPNO;
+IF V_COUNT>0 THEN
+SELECT SAL INTO V_SAL FROM EMP WHERE EMPNO=V_EMPNO;
+V_ANN_SAL:=V_SAL*12;
+RETURN V_ANN_SAL;
+ELSE
+RETURN -1;
+END IF;
+END;
+
+EXECUTION STATEMENT:
+EXEC :ANNSAL:=GET_EMP_ANNSAL(7788);
